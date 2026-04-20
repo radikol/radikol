@@ -862,8 +862,23 @@ footer i {
     nav {
         width: 100%;
         padding: 0.8em 1em;
+        height: auto;
     }
- 
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5em 1.2em;
+        padding-top: 0.5em;
+    }
+
+    .logo {
+        position: static;
+        height: 3.5em;
+        width: 100%;        /* заема целия ред → пада на нов ред */
+        text-align: center;
+    }
+
     nav ul li a {
         font-size: 12px;
     }
