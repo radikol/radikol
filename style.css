@@ -783,6 +783,7 @@ main {
 .project-icon.figma-icon  { background: linear-gradient(135deg, #a259ff, #1abcfe); }
 .project-icon.web-icon    { background: linear-gradient(135deg, var(--pink), #f0a0a0); }
 .project-icon.other-icon  { background: linear-gradient(135deg, #43b89c, #2d8a72); }
+.project-icon.github-icon { background: linear-gradient(135deg, #333, #666); }
 
 .project-type {
     font-size: 11px;
