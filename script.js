@@ -4,26 +4,110 @@ const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
 const lightboxCaption = document.getElementById('lightboxCaption');
 const lightboxClose = document.getElementById('lightboxClose');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+
+// currentGallery holds the list of images being viewed (single image for certs,
+// the full set of project images for carousels) so arrow keys/buttons can step through them
+let currentGallery = null; // { images: [...], captions: [...], index: 0 }
+
+function renderGalleryImage() {
+    const g = currentGallery;
+    lightboxImg.src = g.images[g.index];
+    lightboxCaption.textContent = g.captions[g.index] || '';
+    const showArrows = g.images.length > 1;
+    lightboxPrev.classList.toggle('hidden', !showArrows);
+    lightboxNext.classList.toggle('hidden', !showArrows);
+}
+
+function showPrevImage() {
+    if (!currentGallery || currentGallery.images.length < 2) return;
+    currentGallery.index = (currentGallery.index - 1 + currentGallery.images.length) % currentGallery.images.length;
+    renderGalleryImage();
+}
+
+function showNextImage() {
+    if (!currentGallery || currentGallery.images.length < 2) return;
+    currentGallery.index = (currentGallery.index + 1) % currentGallery.images.length;
+    renderGalleryImage();
+}
+
+function openLightbox(images, captions, startIndex) {
+    currentGallery = {
+        images: Array.isArray(images) ? images : [images],
+        captions: Array.isArray(captions) ? captions : [captions],
+        index: startIndex || 0
+    };
+    renderGalleryImage();
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
 
 certs.forEach(wrap => {
     wrap.addEventListener('click', () => {
         const src = wrap.querySelector('img').src;
         const captionEl = wrap.closest('.cert-card').querySelector('.cert-caption');
-        lightboxImg.src = src;
-        lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        openLightbox(src, captionEl ? captionEl.textContent : '', 0);
     });
 });
 
 lightboxClose.addEventListener('click', closeLightbox);
+lightboxPrev.addEventListener('click', showPrevImage);
+lightboxNext.addEventListener('click', showNextImage);
 lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') showPrevImage();
+    if (e.key === 'ArrowRight') showNextImage();
+});
 
 function closeLightbox() {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
+    currentGallery = null;
 }
+
+// Vertical project carousels
+document.querySelectorAll('.project-carousel').forEach(carousel => {
+    const track = carousel.querySelector('.carousel-track');
+    const dots = carousel.querySelectorAll('.dot');
+    const images = track.querySelectorAll('.carousel-img');
+    if (!images.length) return;
+
+    const projectTitle = carousel.closest('.project-card').querySelector('.project-title').textContent;
+    const imageSrcs = Array.from(images).map(img => img.src);
+    const imageCaptions = imageSrcs.map((_, i) => `${projectTitle} — image ${i + 1} of ${imageSrcs.length}`);
+    const imgHeight = () => images[0].getBoundingClientRect().height;
+
+    // Click a dot to jump to that image
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            track.scrollTo({ top: i * imgHeight(), behavior: 'smooth' });
+        });
+    });
+
+    // Keep the active dot in sync while the user scrolls (inner vertical scroll only, no autoplay)
+    let scrollTimeout;
+    track.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            const index = Math.round(track.scrollTop / imgHeight());
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }, 80);
+    });
+
+    // Click an image to open the full gallery in the lightbox, starting at that image;
+    // left/right arrows (or on-screen buttons) then step through the rest of this project's images
+    images.forEach((img, i) => {
+        img.addEventListener('click', () => {
+            openLightbox(imageSrcs, imageCaptions, i);
+        });
+
+        // Hide any image that fails to load so the placeholder gradient shows instead
+        img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
+    });
+});
 
 // Scroll reveal
 const observer = new IntersectionObserver((entries) => {

@@ -635,6 +635,42 @@ main {
     transform: scale(1.1);
 }
 
+.lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(215, 116, 116, 0.85);
+    border: none;
+    color: white;
+    width: 3em;
+    height: 3em;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    z-index: 100000;
+}
+
+.lightbox-nav:hover {
+    background: var(--pink);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-prev {
+    left: 1.2em;
+}
+
+.lightbox-next {
+    right: 1.2em;
+}
+
+.lightbox-nav.hidden {
+    display: none;
+}
+
 /* ========================
    CONTACTS
 ======================== */
@@ -744,12 +780,21 @@ main {
     border-radius: 1.4em;
     padding: 1.8em;
     display: flex;
-    flex-direction: column;
-    gap: 0.9em;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1.4em;
     transition: transform 0.25s, box-shadow 0.25s;
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.project-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9em;
+    flex: 1;
+    min-width: 0;
 }
 
 .project-card.visible {
@@ -840,6 +885,143 @@ main {
     opacity: 0.75;
 }
 
+/* ---- Project carousel (vertical) ---- */
+.project-carousel {
+    position: relative;
+    margin: auto;
+    width: 130px;
+    height: 260px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+.carousel-track {
+    width: 100%;
+    height: 260px;
+    max-height: 260px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    border-radius: 1em;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* ---- Individual slide ---- */
+.carousel-slide {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    min-height: 260px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* ---- Image ---- */
+.carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    background: linear-gradient(
+        135deg,
+        var(--pink-light),
+        var(--bg-alt)
+    );
+    cursor: pointer;
+    transition: transform 0.35s ease;
+}
+
+.carousel-img:hover {
+    transform: scale(1.04);
+    transform-origin: top left;
+}
+
+/* ---- Image inside slide ---- */
+.carousel-slide .carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+}
+
+/* ---- Hover overlay ---- */
+.carousel-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(215, 116, 116, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.carousel-slide-overlay i {
+    color: white;
+    font-size: 20px;
+}
+
+.carousel-slide:hover .carousel-slide-overlay {
+    opacity: 1;
+}
+
+/* ---- Carousel dots ---- */
+.carousel-dots {
+    position: absolute;
+    right: 0.55em;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45em;
+    z-index: 2;
+}
+
+.carousel-dots .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(215, 116, 116, 0.4);
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        transform 0.2s;
+    padding: 0;
+}
+
+.carousel-dots .dot.active {
+    background: var(--pink);
+    transform: scale(1.3);
+}
+
+
+/* ---- Mobile design carousel ---- */
+#mobile .carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    background: none;
+}
+
+#mobile .carousel-slide .carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
 /* ========================
    FOOTER
 ======================== */
@@ -854,6 +1036,38 @@ footer {
 footer i {
     color: var(--pink);
 }
+
+
+/* ========================
+   TABLET
+======================== */
+@media (max-width: 1070px) {
+    .hero {
+        flex-direction: column;
+        height: auto;
+        padding: 2em;
+        text-align: center;
+    }
+
+    .links {
+        justify-content: center;
+        margin-bottom: 1em;
+    }
+
+    .my-photo-img {
+        width: 60%;
+    }
+
+    .qual-grid {
+        flex-direction: column;
+        gap: 2em;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 
 /* ========================
@@ -908,7 +1122,7 @@ footer i {
     }
  
     .my-photo-img {
-        height: 250px;
+        width: 60%;
         margin-top: 1em;
     }
  
@@ -937,6 +1151,40 @@ footer i {
  
     .projects-grid {
         grid-template-columns: 1fr;
+    }
+
+    .project-card {
+        flex-direction: column;
+    }
+
+    .project-carousel {
+        width: 100%;
+    }
+
+    .carousel-track {
+        max-height: none;
+    }
+
+    .carousel-img {
+        height: 200px;
+    }
+
+    .carousel-slide {
+        height: 200px;
+    }
+
+    .lightbox-nav {
+        width: 2.4em;
+        height: 2.4em;
+        font-size: 15px;
+    }
+
+    .lightbox-prev {
+        left: 0.5em;
+    }
+
+    .lightbox-next {
+        right: 0.5em;
     }
  
     .contact-cards {
