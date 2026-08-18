@@ -142,3 +142,71 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
+
+
+document.querySelectorAll('.project-carousel').forEach(carousel => {
+    const track = carousel.querySelector('.carousel-track');
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dotsContainer = carousel.querySelector('.carousel-dots');
+
+    const maxDots = 5;
+
+    // Create dots
+    slides.forEach((slide, index) => {
+        const dot = document.createElement('button');
+
+        dot.classList.add('dot');
+        dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+
+        dot.addEventListener('click', () => {
+            track.scrollTo({
+                top: slide.offsetTop,
+                behavior: 'smooth'
+            });
+        });
+
+        dotsContainer.appendChild(dot);
+    });
+
+    const allDots = Array.from(
+        dotsContainer.querySelectorAll('.dot')
+    );
+
+    function updateDots() {
+        const currentIndex = Math.round(
+            track.scrollTop / track.clientHeight
+        );
+
+        let startIndex = 0;
+
+        if (slides.length > maxDots) {
+            startIndex = currentIndex - Math.floor(maxDots / 2);
+
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+
+            if (startIndex + maxDots > slides.length) {
+                startIndex = slides.length - maxDots;
+            }
+        }
+
+        allDots.forEach((dot, index) => {
+            const isVisible =
+                index >= startIndex &&
+                index < startIndex + maxDots;
+
+            dot.style.display = isVisible ? 'block' : 'none';
+
+            dot.classList.toggle(
+                'active',
+                index === currentIndex
+            );
+        });
+    }
+
+    track.addEventListener('scroll', updateDots);
+
+    // Initial state
+    updateDots();
+});
